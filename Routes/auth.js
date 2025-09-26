@@ -11,11 +11,13 @@ router.post( "/signup", async ( req, res ) => {
   console.log( body );
   try {
 
+    const hashedPassword = await bcrypt.hash( req.body.password, 10 );
+
     const newUser = await prisma.user.create( {
       data: {
         name: req.body.name,
         email: req.body.email,
-        password: req.body.password,
+        password: hashedPassword,
       },
     } );
 
@@ -36,9 +38,18 @@ router.post( "/signin", async ( req, res ) => {
     const user = await prisma.user.findUnique( {
       where: {
         email: req.body.email,
-        password: req.body.password,
       },
+      include: {
+        books: true
+      }
     } );
+
+    if ( !user ) return res.status( 404 ).json( { message: "User not found" } );
+
+    const validPassword = await bcrypt.compare( req.body.password, user.password );
+    if ( !validPassword ) return res.status( 401 ).json( { message: "Invalid password" } );
+
+
 
     const { password, ...data } = user;
 
@@ -47,7 +58,7 @@ router.post( "/signin", async ( req, res ) => {
     // Set HttpOnly cookie
     res.cookie( "token", token, {
       httpOnly: true,
-      secure: true, // true on prod
+      secure: process.env.NODE_ENV === "production", // true on prod
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     } );
@@ -69,6 +80,9 @@ router.get( "/me", async ( req, res ) => {
       where: {
         id: decoded.id,
       },
+      include: {
+        books: true
+      }
     } );
 
     const { password, ...data } = user;

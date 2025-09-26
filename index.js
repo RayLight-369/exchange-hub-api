@@ -7,8 +7,14 @@ const server = http.createServer( app );
 const bodyParser = require( "body-parser" );
 const cors = require( "cors" );
 const { prisma } = require( './lib/prisma' );
-const AuthRouter = require( './Routes/auth' );
 const cookieParser = require( 'cookie-parser' );
+
+
+const AuthRouter = require( './Routes/auth' );
+const BooksRouter = require( './Routes/books' );
+
+
+
 
 app.use( cors( {
   credentials: true,
@@ -20,6 +26,7 @@ app.use( cookieParser() );
 
 
 app.use( "/auth", AuthRouter );
+app.use( "/books", BooksRouter );
 
 
 server.listen( process.env.PORT, () => {

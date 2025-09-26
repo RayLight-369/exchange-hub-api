@@ -18,11 +18,11 @@ model User {
 }
 
 model Book {
-  id      String  @id @default(auto()) @map("_id") @db.ObjectId
-  title   String
-  author  String?
-  isbn    String?
-  subject String? // e.g. "Math", "CS"
-  owner   User    @relation(fields: [ownerId], references: [id])
-  ownerId String  @db.ObjectId
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  price     String?
+  subject   String? // e.g. "Math", "CS"
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId   String   @db.ObjectId
+  createdAt DateTime @default(now())
 }
